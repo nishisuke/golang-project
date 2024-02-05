@@ -8,5 +8,6 @@ go install github.com/cosmtrek/air@latest // cf. https://github.com/cosmtrek/air
 ## Run
 
 ```
+docker compose up -d
 air
 ```
