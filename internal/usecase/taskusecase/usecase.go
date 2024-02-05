@@ -76,7 +76,19 @@ func NewDeleteUsecase(db *gorm.DB) *DeleteUsecase {
 
 func (u ListUsecase) TaskList(ctx context.Context, input *ListInput) ([]task.Task, error) {
 	var list []task.Task
-	err := u.db.Find(&list).Error
+	var query *gorm.DB
+	switch input.Type {
+	case ListTypeAll:
+		query = u.db
+	case ListTypeDone:
+		query = u.db.Where("is_done = ?", true)
+	case ListTypeNotDone:
+		query = u.db.Where("is_done = ?", false)
+	default:
+		panic("unkown task list type")
+	}
+	err := query.Find(&list).Error
+
 	if err != nil {
 		return nil, err
 	}
