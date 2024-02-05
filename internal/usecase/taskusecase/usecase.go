@@ -2,7 +2,6 @@ package taskusecase
 
 import (
 	"context"
-	"golang-project/internal/model"
 	"golang-project/internal/model/task"
 	"time"
 
@@ -105,13 +104,15 @@ func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*tas
 }
 
 func (u ToggleDoneUsecase) ToggleTaskDone(ctx context.Context, input *ToggleDoneInput) error {
-	data := &task.Task{ID: input.ID}
-	doneAt := model.NewNullTimeNull()
+	diff := new(task.Task)
 	if input.IsDone {
-		doneAt = model.NewNullTime(time.Now())
+		diff.Done(time.Now())
+	} else {
+		diff.Undone()
 	}
+	target := &task.Task{ID: input.ID}
 
-	err := u.db.Model(&data).Updates(task.Task{IsDone: input.IsDone, DoneAt: doneAt}).Error
+	err := u.db.Model(target).Updates(diff).Error
 
 	if err != nil {
 		return err

@@ -15,3 +15,15 @@ type (
 		UpdatedAt time.Time      `json:"updated_at"`
 	}
 )
+
+func (t *Task) Done(doneAt time.Time) *Task {
+	t.IsDone = true
+	t.DoneAt = model.NewNullTime(doneAt)
+	return t
+}
+
+func (t *Task) Undone() *Task {
+	t.IsDone = false
+	t.DoneAt = model.NewNullTimeNull()
+	return t
+}
