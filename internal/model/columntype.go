@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"database/sql/driver"
+	"time"
 )
 
 type (
@@ -22,4 +23,13 @@ func (nt NullTime) Value() (driver.Value, error) {
 
 func (nt *NullTime) Scan(value interface{}) error {
 	return (*sql.NullTime)(nt).Scan(value)
+}
+
+func NewNullTime(t time.Time) NullTime {
+	return NullTime{Time: t, Valid: true}
+}
+
+func NewNullTimeNull() NullTime {
+	var nt NullTime
+	return nt
 }

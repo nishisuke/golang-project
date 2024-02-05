@@ -2,7 +2,9 @@ package taskusecase
 
 import (
 	"context"
+	"golang-project/internal/model"
 	"golang-project/internal/model/task"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -30,7 +32,7 @@ type (
 	}
 	ToggleDoneInput struct {
 		ID     uint
-		IsDone bool
+		IsDone bool `json:"is_done"`
 	}
 	DeleteInput struct {
 		ID uint
@@ -82,18 +84,36 @@ func (u ListUsecase) TaskList(ctx context.Context, input *ListInput) ([]task.Tas
 }
 
 func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*task.Task, error) {
-	task := &task.Task{Name: input.Name}
-	err := u.db.Create(task).Error
+	data := &task.Task{Name: input.Name}
+	err := u.db.Create(data).Error
 	if err != nil {
 		return nil, err
 	}
-	return task, nil
+	return data, nil
 }
 
 func (u ToggleDoneUsecase) ToggleTaskDone(ctx context.Context, input *ToggleDoneInput) error {
+	data := &task.Task{ID: input.ID}
+	doneAt := model.NewNullTimeNull()
+	if input.IsDone {
+		doneAt = model.NewNullTime(time.Now())
+	}
+
+	err := u.db.Model(&data).Updates(task.Task{IsDone: input.IsDone, DoneAt: doneAt}).Error
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (u DeleteUsecase) DeleteTask(ctx context.Context, input *DeleteInput) error {
+	data := &task.Task{ID: input.ID}
+	err := u.db.Delete(data).Error
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

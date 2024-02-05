@@ -3,6 +3,7 @@ package handler
 import (
 	"golang-project/internal/usecase/taskusecase"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -72,8 +73,20 @@ func (h TaskCreateHandler) EchoHandler(c echo.Context) error {
 
 func (h TaskToggleDoneHandler) EchoHandler(c echo.Context) error {
 	ctx := c.Request().Context()
-	input := &taskusecase.ToggleDoneInput{}
-	err := h.toggleDoneUsecase.ToggleTaskDone(ctx, input)
+	id, err := idFromPath(c)
+	if err != nil {
+		return err
+	}
+
+	input := new(taskusecase.ToggleDoneInput)
+
+	if err := c.Bind(input); err != nil {
+		return err
+	}
+
+	input.ID = id
+
+	err = h.toggleDoneUsecase.ToggleTaskDone(ctx, input)
 	if err != nil {
 		return err
 	}
@@ -82,10 +95,24 @@ func (h TaskToggleDoneHandler) EchoHandler(c echo.Context) error {
 
 func (h TaskDeleteHandler) EchoHandler(c echo.Context) error {
 	ctx := c.Request().Context()
-	input := &taskusecase.DeleteInput{}
-	err := h.deleteUsecase.DeleteTask(ctx, input)
+	id, err := idFromPath(c)
+	if err != nil {
+		return err
+	}
+	input := &taskusecase.DeleteInput{
+		ID: id,
+	}
+	err = h.deleteUsecase.DeleteTask(ctx, input)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func idFromPath(c echo.Context) (uint, error) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return uint(id), nil
 }
