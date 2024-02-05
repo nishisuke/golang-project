@@ -16,14 +16,14 @@ type (
 	}
 )
 
-func (t *Task) Done(doneAt time.Time) *Task {
+func (t *Task) Done(doneAt time.Time) []string {
 	t.IsDone = true
 	t.DoneAt = model.NewNullTime(doneAt)
-	return t
+	return []string{"is_done", "done_at"}
 }
 
-func (t *Task) Undone() *Task {
+func (t *Task) Undone() []string {
 	t.IsDone = false
 	t.DoneAt = model.NewNullTimeNull()
-	return t
+	return []string{"is_done", "done_at"}
 }

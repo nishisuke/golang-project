@@ -2,6 +2,7 @@ package server
 
 import (
 	"golang-project/internal/handler"
+	"golang-project/internal/repo"
 	"golang-project/internal/usecase/taskusecase"
 
 	"github.com/labstack/echo/v4"
@@ -9,10 +10,12 @@ import (
 )
 
 func NewServer(db *gorm.DB) (*echo.Echo, error) {
-	taskListUsecase := taskusecase.NewListUsecase(db)
-	taskCreateUsecase := taskusecase.NewCreateUsecase(db)
-	taskToggleDoneUsecase := taskusecase.NewToggleDoneUsecase(db)
-	taskDeleteUsecase := taskusecase.NewDeleteUsecase(db)
+	repo := repo.NewTaskRepo(db)
+
+	taskListUsecase := taskusecase.NewListUsecase(repo)
+	taskCreateUsecase := taskusecase.NewCreateUsecase(repo)
+	taskToggleDoneUsecase := taskusecase.NewToggleDoneUsecase(repo)
+	taskDeleteUsecase := taskusecase.NewDeleteUsecase(repo)
 
 	taskListHandler := handler.NewTaskListHandler(taskListUsecase)
 	taskCreateHandler := handler.NewTaskCreateHandler(taskCreateUsecase)

@@ -40,7 +40,7 @@ func main() {
 	exitIfError(err)
 
 	// TODO: PORTもENV化
-	e.Logger.Fatal(e.Start(":9000"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
 
 func openGORM(dbName, user, pass, host, port string, loc *time.Location) (*gorm.DB, error) {

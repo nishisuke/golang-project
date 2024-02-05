@@ -3,23 +3,22 @@ package taskusecase
 import (
 	"context"
 	"golang-project/internal/model/task"
+	"golang-project/internal/usecase"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type (
 	ListUsecase struct {
-		db *gorm.DB
+		taskRepo usecase.TaskRepo
 	}
 	CreateUsecase struct {
-		db *gorm.DB
+		taskRepo usecase.TaskRepo
 	}
 	ToggleDoneUsecase struct {
-		db *gorm.DB
+		taskRepo usecase.TaskRepo
 	}
 	DeleteUsecase struct {
-		db *gorm.DB
+		taskRepo usecase.TaskRepo
 	}
 
 	ListType  int
@@ -57,46 +56,38 @@ func NewTaskListType(s string) ListType {
 	}
 }
 
-func NewListUsecase(db *gorm.DB) *ListUsecase {
-	return &ListUsecase{db}
+func NewListUsecase(repo usecase.TaskRepo) *ListUsecase {
+	return &ListUsecase{repo}
 }
 
-func NewCreateUsecase(db *gorm.DB) *CreateUsecase {
-	return &CreateUsecase{db}
+func NewCreateUsecase(repo usecase.TaskRepo) *CreateUsecase {
+	return &CreateUsecase{repo}
 }
 
-func NewToggleDoneUsecase(db *gorm.DB) *ToggleDoneUsecase {
-	return &ToggleDoneUsecase{db}
+func NewToggleDoneUsecase(repo usecase.TaskRepo) *ToggleDoneUsecase {
+	return &ToggleDoneUsecase{repo}
 }
 
-func NewDeleteUsecase(db *gorm.DB) *DeleteUsecase {
-	return &DeleteUsecase{db}
+func NewDeleteUsecase(repo usecase.TaskRepo) *DeleteUsecase {
+	return &DeleteUsecase{repo}
 }
 
 func (u ListUsecase) TaskList(ctx context.Context, input *ListInput) ([]task.Task, error) {
-	var list []task.Task
-	var query *gorm.DB
 	switch input.Type {
 	case ListTypeAll:
-		query = u.db
+		return u.taskRepo.FindAllTask()
 	case ListTypeDone:
-		query = u.db.Where("is_done = ?", true)
+		return u.taskRepo.FindDoneTask()
 	case ListTypeNotDone:
-		query = u.db.Where("is_done = ?", false)
+		return u.taskRepo.FindUndoneTask()
 	default:
 		panic("unkown task list type")
 	}
-	err := query.Find(&list).Error
-
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
 }
 
 func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*task.Task, error) {
 	data := &task.Task{Name: input.Name}
-	err := u.db.Create(data).Error
+	err := u.taskRepo.CreateTask(data)
 	if err != nil {
 		return nil, err
 	}
@@ -105,14 +96,14 @@ func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*tas
 
 func (u ToggleDoneUsecase) ToggleTaskDone(ctx context.Context, input *ToggleDoneInput) error {
 	diff := new(task.Task)
+	var updateColumn []string
 	if input.IsDone {
-		diff.Done(time.Now())
+		updateColumn = diff.Done(time.Now())
 	} else {
-		diff.Undone()
+		updateColumn = diff.Undone()
 	}
-	target := &task.Task{ID: input.ID}
 
-	err := u.db.Model(target).Updates(diff).Error
+	err := u.taskRepo.UpdateTask(input.ID, *diff, updateColumn)
 
 	if err != nil {
 		return err
@@ -122,8 +113,7 @@ func (u ToggleDoneUsecase) ToggleTaskDone(ctx context.Context, input *ToggleDone
 }
 
 func (u DeleteUsecase) DeleteTask(ctx context.Context, input *DeleteInput) error {
-	data := &task.Task{ID: input.ID}
-	err := u.db.Delete(data).Error
+	err := u.taskRepo.DeleteTask(input.ID)
 	if err != nil {
 		return err
 	}
