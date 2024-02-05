@@ -86,7 +86,7 @@ func (u ListUsecase) TaskList(ctx context.Context, input *ListInput) ([]task.Tas
 }
 
 func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*task.Task, error) {
-	data := &task.Task{Name: input.Name}
+	data := task.NewTask(input.Name)
 	err := u.taskRepo.CreateTask(data)
 	if err != nil {
 		return nil, err

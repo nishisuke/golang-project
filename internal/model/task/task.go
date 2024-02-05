@@ -16,6 +16,12 @@ type (
 	}
 )
 
+func NewTask(name string) *Task {
+	return &Task{
+		Name: name,
+	}
+}
+
 func (t *Task) Done(doneAt time.Time) []string {
 	t.IsDone = true
 	t.DoneAt = model.NewNullTime(doneAt)
