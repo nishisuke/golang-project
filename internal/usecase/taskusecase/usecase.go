@@ -4,6 +4,7 @@ import (
 	"context"
 	"golang-project/internal/model/task"
 	"golang-project/internal/usecase"
+	"golang-project/internal/validation"
 	"time"
 )
 
@@ -26,7 +27,7 @@ type (
 		Type ListType
 	}
 	CreateInput struct {
-		Name string `json:"name"`
+		Name string `json:"name" validate:"required"`
 	}
 	ToggleDoneInput struct {
 		ID     uint
@@ -86,9 +87,14 @@ func (u ListUsecase) TaskList(ctx context.Context, input *ListInput) ([]task.Tas
 }
 
 func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*task.Task, error) {
+	validate := validation.NewValidator()
+	if err := validate.StructCtx(ctx, input); err != nil {
+		return nil, err
+	}
+
 	data := task.NewTask(input.Name)
-	err := u.taskRepo.CreateTask(data)
-	if err != nil {
+
+	if err := u.taskRepo.CreateTask(data); err != nil {
 		return nil, err
 	}
 	return data, nil
