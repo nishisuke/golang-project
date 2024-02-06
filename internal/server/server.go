@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"golang-project/internal/handler"
+	"golang-project/internal/pkg/mailer"
 	"golang-project/internal/repo"
 	"golang-project/internal/usecase/taskusecase"
 	"net/http"
@@ -15,8 +16,12 @@ import (
 func NewServer(db *gorm.DB) (*echo.Echo, error) {
 	repo := repo.NewTaskRepo(db)
 
+	mailer := mailer.NewMailer()
+
+	taskCreateService := taskusecase.NewCreateTaskService(db, mailer)
+
 	taskListUsecase := taskusecase.NewListUsecase(repo)
-	taskCreateUsecase := taskusecase.NewCreateUsecase(repo)
+	taskCreateUsecase := taskusecase.NewCreateUsecase(repo, taskCreateService)
 	taskToggleDoneUsecase := taskusecase.NewToggleDoneUsecase(repo)
 	taskDeleteUsecase := taskusecase.NewDeleteUsecase(repo)
 

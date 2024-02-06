@@ -13,7 +13,8 @@ type (
 		taskRepo usecase.TaskRepo
 	}
 	CreateUsecase struct {
-		taskRepo usecase.TaskRepo
+		taskRepo      usecase.TaskRepo
+		createService *CreateTaskService
 	}
 	ToggleDoneUsecase struct {
 		taskRepo usecase.TaskRepo
@@ -61,8 +62,8 @@ func NewListUsecase(repo usecase.TaskRepo) *ListUsecase {
 	return &ListUsecase{repo}
 }
 
-func NewCreateUsecase(repo usecase.TaskRepo) *CreateUsecase {
-	return &CreateUsecase{repo}
+func NewCreateUsecase(repo usecase.TaskRepo, createService *CreateTaskService) *CreateUsecase {
+	return &CreateUsecase{repo, createService}
 }
 
 func NewToggleDoneUsecase(repo usecase.TaskRepo) *ToggleDoneUsecase {
@@ -94,9 +95,10 @@ func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*tas
 
 	data := task.NewTask(input.Name)
 
-	if err := u.taskRepo.CreateTask(ctx, data); err != nil {
+	if err := u.createService.CreateTask(ctx, data); err != nil {
 		return nil, err
 	}
+
 	return data, nil
 }
 
