@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"golang-project/internal/model/task"
 
 	"gorm.io/gorm"
@@ -16,32 +17,32 @@ func NewTaskRepo(db *gorm.DB) *TaskRepo {
 	return &TaskRepo{db}
 }
 
-func (r *TaskRepo) FindAllTask() ([]task.Task, error) {
+func (r *TaskRepo) FindAllTask(ctx context.Context) ([]task.Task, error) {
 	var tasks []task.Task
-	err := r.db.Find(&tasks).Error
+	err := r.db.WithContext(ctx).Find(&tasks).Error
 	return tasks, err
 }
 
-func (r *TaskRepo) FindDoneTask() ([]task.Task, error) {
+func (r *TaskRepo) FindDoneTask(ctx context.Context) ([]task.Task, error) {
 	var tasks []task.Task
-	err := r.db.Where("is_done = ?", true).Find(&tasks).Error
+	err := r.db.WithContext(ctx).Where("is_done = ?", true).Find(&tasks).Error
 	return tasks, err
 }
-func (r *TaskRepo) FindUndoneTask() ([]task.Task, error) {
+func (r *TaskRepo) FindUndoneTask(ctx context.Context) ([]task.Task, error) {
 	var tasks []task.Task
-	err := r.db.Where("is_done = ?", true).Find(&tasks).Error
+	err := r.db.WithContext(ctx).Where("is_done = ?", true).Find(&tasks).Error
 	return tasks, err
 }
-func (r *TaskRepo) CreateTask(task *task.Task) error {
-	return r.db.Create(task).Error
+func (r *TaskRepo) CreateTask(ctx context.Context, task *task.Task) error {
+	return r.db.WithContext(ctx).Create(task).Error
 }
 
-func (r *TaskRepo) UpdateTask(id uint, diff task.Task, targetColumn []string) error {
+func (r *TaskRepo) UpdateTask(ctx context.Context, id uint, diff task.Task, targetColumn []string) error {
 	target := &task.Task{ID: id}
-	return r.db.Model(target).Select(targetColumn).Omit("id").Updates(diff).Error
+	return r.db.WithContext(ctx).Model(target).Select(targetColumn).Omit("id").Updates(diff).Error
 }
 
-func (r *TaskRepo) DeleteTask(id uint) error {
+func (r *TaskRepo) DeleteTask(ctx context.Context, id uint) error {
 	data := &task.Task{ID: id}
-	return r.db.Delete(data).Error
+	return r.db.WithContext(ctx).Delete(data).Error
 }

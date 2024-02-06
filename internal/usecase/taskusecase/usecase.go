@@ -76,11 +76,11 @@ func NewDeleteUsecase(repo usecase.TaskRepo) *DeleteUsecase {
 func (u ListUsecase) TaskList(ctx context.Context, input *ListInput) ([]task.Task, error) {
 	switch input.Type {
 	case ListTypeAll:
-		return u.taskRepo.FindAllTask()
+		return u.taskRepo.FindAllTask(ctx)
 	case ListTypeDone:
-		return u.taskRepo.FindDoneTask()
+		return u.taskRepo.FindDoneTask(ctx)
 	case ListTypeNotDone:
-		return u.taskRepo.FindUndoneTask()
+		return u.taskRepo.FindUndoneTask(ctx)
 	default:
 		panic("unkown task list type")
 	}
@@ -94,7 +94,7 @@ func (u CreateUsecase) CreateTask(ctx context.Context, input *CreateInput) (*tas
 
 	data := task.NewTask(input.Name)
 
-	if err := u.taskRepo.CreateTask(data); err != nil {
+	if err := u.taskRepo.CreateTask(ctx, data); err != nil {
 		return nil, err
 	}
 	return data, nil
@@ -109,7 +109,7 @@ func (u ToggleDoneUsecase) ToggleTaskDone(ctx context.Context, input *ToggleDone
 		updateColumn = diff.Undone()
 	}
 
-	err := u.taskRepo.UpdateTask(input.ID, *diff, updateColumn)
+	err := u.taskRepo.UpdateTask(ctx, input.ID, *diff, updateColumn)
 
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func (u ToggleDoneUsecase) ToggleTaskDone(ctx context.Context, input *ToggleDone
 }
 
 func (u DeleteUsecase) DeleteTask(ctx context.Context, input *DeleteInput) error {
-	err := u.taskRepo.DeleteTask(input.ID)
+	err := u.taskRepo.DeleteTask(ctx, input.ID)
 	if err != nil {
 		return err
 	}

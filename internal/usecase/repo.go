@@ -1,14 +1,17 @@
 package usecase
 
-import "golang-project/internal/model/task"
+import (
+	"context"
+	"golang-project/internal/model/task"
+)
 
 type (
 	TaskRepo interface {
-		FindAllTask() ([]task.Task, error)
-		FindDoneTask() ([]task.Task, error)
-		FindUndoneTask() ([]task.Task, error)
-		CreateTask(task *task.Task) error
-		UpdateTask(id uint, diff task.Task, targetColumn []string) error
-		DeleteTask(id uint) error
+		FindAllTask(context.Context) ([]task.Task, error)
+		FindDoneTask(context.Context) ([]task.Task, error)
+		FindUndoneTask(context.Context) ([]task.Task, error)
+		CreateTask(context.Context, *task.Task) error
+		UpdateTask(context.Context, uint, task.Task, []string) error
+		DeleteTask(context.Context, uint) error
 	}
 )
