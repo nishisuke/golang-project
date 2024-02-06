@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"golang-project/internal/model/task"
 	"golang-project/internal/usecase"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func (s CreateTaskService) CreateTask(ctx context.Context, task *task.Task) erro
 			return err
 		}
 
-		err := s.mailer.SendEmail(ctx, to, sub, msg) // 作成から24時間後にリマインドメールを送る。という仕様。
+		err := s.mailer.SendEmailAfter(ctx, to, sub, msg, 24*time.Hour) // 作成から24時間後にリマインドメールを送る。という仕様。
 		if err != nil {
 			return err
 		}
